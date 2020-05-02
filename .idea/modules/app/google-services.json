@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "253076027428",
+    "firebase_url": "https://snapventure-multiplayer.firebaseio.com",
+    "project_id": "snapventure-multiplayer",
+    "storage_bucket": "snapventure-multiplayer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253076027428:android:b3f72376f4e866cde140b1",
+        "android_client_info": {
+          "package_name": "com.example.snapventuremultiplayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "253076027428-ai23i37oblde82uo8vhf4e6k2c7a2sm7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.snapventuremultiplayer",
+            "certificate_hash": "0078b8ae1f756b43f9e5f62c0a78dfc900da54b9"
+          }
+        },
+        {
+          "client_id": "253076027428-l2n4gtiojotjfoerf99crscahtu5nvq9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArGXOGw5NVnQQxMbQc_TyVJQaQG7i9D4g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "253076027428-l2n4gtiojotjfoerf99crscahtu5nvq9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

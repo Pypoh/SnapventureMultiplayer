@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Snapventure Multiplayer</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="loginButtonText">Login</string>
+    <string name="title_qr_scan">Scan</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="setting">Setting</string>
+    <string name="LupaPass">Lupa Password</string>
+    <string name="login_hint_email">Email</string>
+    <string name="login_hint_password">Password</string>
+    <string name="login_text_lupa_password">Lupa Password?</string>
+    <string name="login_text_login">Login</string>
+    <string name="login_text_atau">atau</string>
+    <string name="login_text_guest">Masuk sebagai tamu</string>
+    <string name="login_text_register">Daftar</string>
+</resources>
