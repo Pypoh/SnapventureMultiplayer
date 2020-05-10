@@ -12,4 +12,24 @@
     <color name="white">#FFFFFF</color>
 
     <color name="divider_color">#1E000000</color>
+
+    <color name="garden_green">#74AA2D</color>
+    <color name="kitchen_yellow">#F6A800</color>
+    <color name="classroom_red">#D3351B</color>
+    <color name="street_black">#393939</color>
+
+    <color name="transparent">#00000000</color>
+
+    <color name="grey_background">#9D9D9D</color>
+    <color name="grey_locked">#C6C6C6</color>
+    <color name="grey_locked_content">#444444</color>
+    <color name="grey_backgrond_profile">#EBEBEB</color>
+
+    <color name="gold_leaderboard">#FDDC05</color>
+    <color name="silver_leaderboard">#939089</color>
+    <color name="bronze_leaderboard">#B0671E</color>
+
+    <color name="text_auth">#4F4C5D</color>
+
+    <color name="navy_blue">#003049</color>
 </resources>

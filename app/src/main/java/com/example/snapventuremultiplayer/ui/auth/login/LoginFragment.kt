@@ -82,7 +82,6 @@ class LoginFragment : Fragment() {
                     }
 
                     is Resource.Success -> {
-                        // TODO: Intent ke main
                         requireContext().toast("Success")
                         if (alertDialog.isShowing) alertDialog.dismiss()
                         intentToMain()

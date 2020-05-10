@@ -13,6 +13,7 @@ import com.example.snapventuremultiplayer.utils.Constants
 import com.example.snapventuremultiplayer.utils.viewobject.Resource
 import com.example.snapventuremultiplayer.R
 import com.example.snapventuremultiplayer.ui.MainActivity
+import com.example.snapventuremultiplayer.ui.camera.CameraActivity
 
 class SplashScreenActivity : AppCompatActivity() {
 
@@ -35,6 +36,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 is Resource.Success -> if (it.data.currentUser != null) {
                     navigateToMainActivity()
                 } else {
+//                    navigateToCameraActivity()
                     navigateToAuthActivity()
                 }
 
@@ -54,5 +56,11 @@ class SplashScreenActivity : AppCompatActivity() {
     private fun navigateToMainActivity() {
         finish()
         startActivity(Intent(this, MainActivity::class.java))
+    }
+
+    // DEBUG
+    private fun navigateToCameraActivity() {
+        finish()
+        startActivity(Intent(this, CameraActivity::class.java))
     }
 }

@@ -17,8 +17,6 @@ class LoginViewModel(private val useCase: ILogin) : ViewModel() {
     var password: MutableLiveData<String> = MutableLiveData()
     lateinit var result: LiveData<Resource<AuthResult?>>
 
-    // TODO: Bersihin, tambahin timeout login
-
     // Error Correct Negative
     fun loginWithEmailAndPassword() {
         result = liveData(Dispatchers.IO) {

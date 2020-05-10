@@ -1,5 +1,7 @@
 package com.example.snapventuremultiplayer.utils
 
+import android.Manifest
+
 class Constants {
 
     companion object {
@@ -14,6 +16,15 @@ class Constants {
 
         // Firestore User Document Column
         const val NIM = "nim"
+
+        // Permissions
+        const val CAMERA_REQUEST_CODE_PERMISSIONS = 10
+
+        val REQUIRED_PERMISSIONS =
+            arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+
+        // Intent
+        const val EXTRA_ROOM_DATA = "EXTRA_ROOM_DATA"
 
     }
 }

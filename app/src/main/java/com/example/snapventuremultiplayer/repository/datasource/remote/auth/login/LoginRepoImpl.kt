@@ -17,7 +17,6 @@ class LoginRepoImpl : ILoginRepo {
             val data = mAuth
                 .signInWithEmailAndPassword(email, password)
                 .await()
-
             Resource.Success(data)
         } catch (e: FirebaseAuthException) {
             Resource.Failure(e)
