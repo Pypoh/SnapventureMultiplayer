@@ -9,6 +9,7 @@ class Constants {
         // Timeout / Delay
         const val AUTH_TIMEOUT: Long = 5000L
         const val SPLASH_SCREEN_DELAY: Long = 2000L
+        const val RIDDLE_STAGE_TIMEOUT: Long = 30000L
 
         // Firebase Collection
         const val ROOM_COLLECTION = "room"
@@ -25,6 +26,9 @@ class Constants {
 
         // Intent
         const val EXTRA_ROOM_DATA = "EXTRA_ROOM_DATA"
+
+        // Header
+        const val RIDDLE_POPUP_HEADER = "Question "
 
     }
 }

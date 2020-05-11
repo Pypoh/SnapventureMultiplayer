@@ -22,7 +22,12 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val roomUseCas
     val playerNumber: MutableLiveData<Int> = MutableLiveData()
     val score: MutableLiveData<Int> = MutableLiveData()
 
-    lateinit var roomData: RoomModel
+    // Gameplay
+    var currentStage: MutableLiveData<Int> = MutableLiveData()
+    var currentRiddle: MutableLiveData<String> = MutableLiveData()
+    var currentAnswer: MutableLiveData<String> = MutableLiveData()
+
+    var roomData: MutableLiveData<RoomModel> = MutableLiveData()
 
     lateinit var detectionData: LiveData<Resource<List<FirebaseVisionImageLabel>?>>
 
@@ -34,11 +39,38 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val roomUseCas
                     cameraUseCase.detectFromBitmap(context, bitmap)
                 emit(detectionResult)
             } catch (e: Exception) {
-                Log.d("CameraViewModel: ", "Error: ${e.message}")
-                Log.d("CameraViewModel: ", "Error: ${e.cause}")
                 emit(Resource.Failure(e.cause!!))
             }
         }
+    }
+
+    fun setupRoomData(roomModel: RoomModel) {
+        this.roomData.value = roomModel
+    }
+
+    fun setStage(stageNumber: Int) {
+        try {
+            // Setup Temp for Undo
+            val tempCurrentStage = currentStage.value
+
+            currentStage.value = stageNumber
+            if (currentStage.value!! < getStageSize()) {
+                val questionModel = roomData.value?.questions?.get(stageNumber)
+                if (questionModel != null) {
+                    currentRiddle.value = questionModel.question
+                    currentAnswer.value = questionModel.answer
+                }
+            } else {
+                currentStage.value = tempCurrentStage
+            }
+
+        } catch (e: Exception) {
+            Log.d("CameraViewModel: ", "Error: ${e.message}")
+        }
+    }
+
+    fun getStageSize(): Int {
+        return roomData.value?.questions!!.size
     }
 
 }
