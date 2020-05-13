@@ -36,7 +36,7 @@ class RegisterRepoImpl : IRegisterRepo {
     override fun insertUserData(name: String, email: String) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         val userRef: DocumentReference = mRef.collection("users").document(userId.toString())
-        val userModel = User.UserRegister("saya", "saya@gmail.com")
+        val userModel = User.UserRegister(name, email)
         return try {
             val  data = userRef.set(userModel).addOnSuccessListener{
 

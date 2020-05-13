@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -17,14 +18,14 @@ class DashboardFragment : Fragment() {
     private lateinit var dashboardViewModel: DashboardViewModel
 
     private lateinit var homeViewModel: HomeViewModel
-    private lateinit var locationButton: Button
-    private lateinit var mode1vs1Button: Button
-    private lateinit var mode2vs2Button: Button
-    private lateinit var mode3vs3Button: Button
-    private lateinit var createRoomButton: Button
-    private lateinit var joinRoomButton: Button
-    private lateinit var freeRoomButton: Button
-    private lateinit var quickStartButton: Button
+    private lateinit var locationButton: ImageButton
+    private lateinit var mode1vs1Button: ImageButton
+    private lateinit var mode2vs2Button: ImageButton
+    private lateinit var mode3vs3Button: ImageButton
+    private lateinit var createRoomButton: ImageButton
+    private lateinit var joinRoomButton: ImageButton
+    private lateinit var freeRoomButton: ImageButton
+    private lateinit var quickStartButton: ImageButton
     private lateinit var PlayerName: TextView
     private lateinit var LevelPlayer: TextView
     private lateinit var TextLokasi: TextView
