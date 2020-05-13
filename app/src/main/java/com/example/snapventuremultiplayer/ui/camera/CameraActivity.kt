@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -21,11 +22,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.snapventuremultiplayer.R
 import com.example.snapventuremultiplayer.databinding.ActivityCameraBinding
+import com.example.snapventuremultiplayer.repository.datasource.remote.auth.other.AuthRepoImpl
 import com.example.snapventuremultiplayer.repository.datasource.remote.firestore.matchmaking.MatchmakingRepoImpl
 import com.example.snapventuremultiplayer.repository.datasource.remote.mlkit.imagelabeling.ImageLabelingRepoImpl
 import com.example.snapventuremultiplayer.repository.model.RoomModel
+import com.example.snapventuremultiplayer.ui.auth.domain.AuthImpl
 import com.example.snapventuremultiplayer.ui.camera.domain.camera.CameraImpl
-import com.example.snapventuremultiplayer.ui.camera.domain.room.RoomImpl
+import com.example.snapventuremultiplayer.ui.camera.domain.score.ScoreImpl
 import com.example.snapventuremultiplayer.utils.Constants.Companion.CAMERA_REQUEST_CODE_PERMISSIONS
 import com.example.snapventuremultiplayer.utils.Constants.Companion.EXTRA_ROOM_DATA
 import com.example.snapventuremultiplayer.utils.Constants.Companion.REQUIRED_PERMISSIONS
@@ -42,11 +45,12 @@ import java.util.concurrent.Executors
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
+    private lateinit var countDownTimer: CountDownTimer
 
     private val cameraViewModel: CameraViewModel by lazy {
         ViewModelProvider(
             this,
-            CameraVMFactory(CameraImpl(ImageLabelingRepoImpl()), RoomImpl(MatchmakingRepoImpl()))
+            CameraVMFactory(CameraImpl(ImageLabelingRepoImpl()), ScoreImpl(MatchmakingRepoImpl()))
         ).get(CameraViewModel::class.java)
     }
 
@@ -73,8 +77,13 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun initGameActivity() {
+        // Setup Lives
+        cameraViewModel.lives.value = 5
+        cameraViewModel.score.value = 0
+
         // Set Stage game in viewModel
         cameraViewModel.setStage(0)
+        cameraViewModel.setTimer()
 
         // Setup Riddle Header
         cameraViewModel.currentStage.observe(this, Observer { stage ->
@@ -86,6 +95,9 @@ class CameraActivity : AppCompatActivity() {
         cameraViewModel.currentRiddle.observe(this, Observer { riddleText ->
             binding.popupRiddleCamera.riddlesTextPopup.setText(riddleText)
         })
+
+        // Setup Progress Bar
+        // TODO: Smooth Horizontal Progress Bar
     }
 
     private fun getIntentExtras() {
@@ -152,13 +164,42 @@ class CameraActivity : AppCompatActivity() {
 
                 is Resource.Success -> {
                     toast("Success")
-                    for (result in task.data!!) {
+                    binding.snapBtn.isEnabled = true
+                    loop@ for (result in task.data!!) {
                         Log.d(
                             "CameraActivity: ",
                             "Result: ${result.text}, Confidence: ${result.confidence}"
                         )
+
+                        // Process Result
+                        when (result.text) {
+                            cameraViewModel.currentAnswer.value -> {
+                                cameraViewModel.nextStage()
+                                cameraViewModel.increaseScore()
+                                Log.d(
+                                    "CameraActivity: ",
+                                    "Correct Answer, Result: ${result.text}, Going into next round..."
+                                )
+                                break@loop
+                            }
+                        }
                     }
-                    binding.snapBtn.isEnabled = true
+
+                    when (cameraViewModel.lives.value) {
+                        1 -> {
+                            // TODO: Add Result Fail
+                            toast("You lose")
+
+                        }
+                        else -> {
+                            // Show Wrong Dialog here
+                            // TODO: Show Wrong Dialog
+                            toast("Wrong answer, current live: ${cameraViewModel.lives.value}")
+                            cameraViewModel.decreaseLive(1)
+                        }
+                    }
+                    // DEBUG
+//                    cameraViewModel.nextStage()
                 }
 
                 is Resource.Failure -> {
