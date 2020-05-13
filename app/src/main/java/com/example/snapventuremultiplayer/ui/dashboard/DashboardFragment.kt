@@ -1,13 +1,18 @@
 package com.example.snapventuremultiplayer.ui.dashboard
 
+import android.app.AlertDialog
+import android.content.ContentValues
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -54,6 +59,11 @@ class DashboardFragment : Fragment() {
     private lateinit var TextLokasi: TextView
     private lateinit var Textmodee: TextView
 
+    // New Code Atifa
+    private lateinit var codeEditText: EditText
+    private var roomName = ""
+    private lateinit var preferences: SharedPreferences
+
     private fun setupViewBinding(view: View) {
         locationButton = view.findViewById(R.id.lokasiMain)
         mode1vs1Button = view.findViewById(R.id.btn1vs1)
@@ -89,6 +99,75 @@ class DashboardFragment : Fragment() {
             GlobalScope.launch {
                 getAllQuestions()
                 Log.d("DashboardFragment", "Getting all question")
+            }
+        }
+
+        //button join klik keluar alert dialog
+        joinRoomButton.setOnClickListener {
+            //Edit text di alert dialog
+            codeEditText = EditText(context)
+            codeEditText.setPadding(
+                    resources.getDimensionPixelOffset(R.dimen.activity_horizontal_margin), 0,
+                    resources.getDimensionPixelOffset(R.dimen.activity_horizontal_margin), 0
+            )
+            codeEditText.hint = "Room Code"
+            val alert = AlertDialog.Builder(context)
+                    .setTitle("Join Room")
+                    .setView(codeEditText)
+                    .setMessage("Please enter the room Code")
+                    //set positif button
+                    .setPositiveButton("Join") { dialog, _ ->
+                        //simpen data yang dimasukkin di edittext ke var roomname
+                        roomName = codeEditText.text.toString()
+                        Log.d("DashboardFragment: ", "$roomName joining...")
+                        codeEditText.setText("") //set text jd kosongan
+                        if (roomName != "") { //kalo ngga kosong
+                            addEventListener(roomName)
+                            Log.d("DashboardFragment: ", "$roomName adding event")
+                        }
+                        dialog.cancel()
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.cancel()
+                    }.create()
+            alert.show()
+        }
+    }
+
+    private fun addEventListener(roomId: String) {
+        //read from database firestore
+//        mRef.collection("multiplayer")
+//                .get()
+//                .addOnSuccessListener { result ->
+//                    for (document in result) {
+//                        Log.d(ContentValues.TAG, "${document.id} => ${document.data}")
+//                        val kode = result.documents
+//                        if (roomName.equals(kode)) {
+//                            preferences = requireContext().getSharedPreferences("PREFS", 0)
+//                            val editor: SharedPreferences.Editor = preferences.edit()
+//                            editor.putString("roomname", roomName)
+//                            editor.apply()
+//                            //pindah fragment
+//                        } else {
+//                            Toast.makeText(context, "Sorry can't get any Data Error!!", Toast.LENGTH_SHORT).show()
+//                        }
+//                    }
+//                }
+//                .addOnFailureListener { exception ->
+//                    Toast.makeText(context, "Sorry can't get any Data Error!!", Toast.LENGTH_SHORT).show()
+//                    Log.w(ContentValues.TAG, "Error getting documents.", exception)
+//                }
+
+        mRef.collection("multiplayer").document(roomId).get().addOnSuccessListener { doc ->
+            if (doc.exists()) {
+                preferences = requireContext().getSharedPreferences("PREFS", 0)
+                Log.d("Dashboard checkRoom", "Room Found")
+//                            val editor: SharedPreferences.Editor = preferences.edit()
+//                            editor.putString("roomname", roomName)
+//                            editor.apply()
+//                            //pindah fragment
+            } else {
+                Log.d("Dashboard checkRoom", "Room Not Found")
             }
         }
     }

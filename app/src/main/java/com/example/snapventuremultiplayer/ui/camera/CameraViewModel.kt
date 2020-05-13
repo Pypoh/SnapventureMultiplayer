@@ -148,6 +148,8 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
 
     private fun listenToScore() {
         opponentFinish.postValue(false)
+
+        Thread.sleep(1000)
         Log.d("CameraViewModelData: ", "snapshot initiated: ${opponentFinish.value}")
 
         val db: FirebaseFirestore = FirebaseFirestore.getInstance()
