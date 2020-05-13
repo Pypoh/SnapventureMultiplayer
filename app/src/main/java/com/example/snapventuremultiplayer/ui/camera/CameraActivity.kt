@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +18,7 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -173,6 +173,26 @@ class CameraActivity : AppCompatActivity() {
         // Riddle Popup Pass Button
         binding.popupRiddleCamera.textPassButton.setOnClickListener {
             passValidator()
+        }
+
+        binding.cameraQuestionButton.setOnClickListener {
+            changeQuestionState()
+        }
+    }
+
+    private fun changeQuestionState() {
+        val questionLayout = findViewById<ConstraintLayout>(R.id.popup_riddle_camera)
+
+        val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
+        val slideDown = AnimationUtils.loadAnimation(this, R.anim.slide_down)
+        if (questionLayout.visibility == View.INVISIBLE) {
+            questionLayout.visibility = View.VISIBLE
+            questionLayout.startAnimation(slideUp)
+            Log.d("animationDebug", "SlideUp")
+        } else {
+            questionLayout.visibility = View.INVISIBLE
+            questionLayout.startAnimation(slideDown)
+            Log.d("animationDebug", "SlideDown")
         }
     }
 
