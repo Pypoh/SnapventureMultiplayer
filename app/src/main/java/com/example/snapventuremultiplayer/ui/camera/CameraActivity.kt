@@ -83,7 +83,6 @@ class CameraActivity : AppCompatActivity() {
 
         // Set Stage game in viewModel
         cameraViewModel.setStage(0)
-        cameraViewModel.setTimer()
 
         // Setup Riddle Header
         cameraViewModel.currentStage.observe(this, Observer { stage ->
@@ -165,17 +164,25 @@ class CameraActivity : AppCompatActivity() {
                 is Resource.Success -> {
                     toast("Success")
                     binding.snapBtn.isEnabled = true
+                    var answered = false
                     loop@ for (result in task.data!!) {
                         Log.d(
                             "CameraActivity: ",
                             "Result: ${result.text}, Confidence: ${result.confidence}"
                         )
 
+                        Log.d(
+                            "CameraActivity: ",
+                            "Result: ${result.text}, Expected: ${cameraViewModel.currentAnswer.value}"
+                        )
+
                         // Process Result
                         when (result.text) {
                             cameraViewModel.currentAnswer.value -> {
+                                cameraViewModel.resetTimer()
                                 cameraViewModel.nextStage()
                                 cameraViewModel.increaseScore()
+                                answered = true
                                 Log.d(
                                     "CameraActivity: ",
                                     "Correct Answer, Result: ${result.text}, Going into next round..."
@@ -185,17 +192,19 @@ class CameraActivity : AppCompatActivity() {
                         }
                     }
 
-                    when (cameraViewModel.lives.value) {
-                        1 -> {
-                            // TODO: Add Result Fail
-                            toast("You lose")
+                    if (!answered) {
+                        when (cameraViewModel.lives.value) {
+                            1 -> {
+                                // TODO: Add Result Fail
+                                toast("You lose")
 
-                        }
-                        else -> {
-                            // Show Wrong Dialog here
-                            // TODO: Show Wrong Dialog
-                            toast("Wrong answer, current live: ${cameraViewModel.lives.value}")
-                            cameraViewModel.decreaseLive(1)
+                            }
+                            else -> {
+                                // Show Wrong Dialog here
+                                // TODO: Show Wrong Dialog
+                                toast("Wrong answer, current live: ${cameraViewModel.lives.value}")
+                                cameraViewModel.decreaseLive(1)
+                            }
                         }
                     }
                     // DEBUG

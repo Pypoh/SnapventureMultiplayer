@@ -75,6 +75,7 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
                 if (questionModel != null) {
                     currentRiddle.value = questionModel.question
                     currentAnswer.value = questionModel.answer
+                    setTimer()
                     Log.d("CameraViewModel: ", "Round $stageNumber initiated")
                 }
             } else {
@@ -98,6 +99,10 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
                 Log.d("CameraViewModel: ", "$millisUntilFinished sec")
             }
         }.start()
+    }
+
+    fun resetTimer() {
+        timer.cancel()
     }
 
     fun nextStage() {

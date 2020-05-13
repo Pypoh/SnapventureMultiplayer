@@ -8,4 +8,6 @@ interface IMatchmakingRepo {
     suspend fun getRoomData(roomID: String) : Resource<RoomModel?>
 
     suspend fun postScore(roomID: String, playerNumber: Int, score: Int)
+
+    suspend fun listenMatchmaking()
 }
