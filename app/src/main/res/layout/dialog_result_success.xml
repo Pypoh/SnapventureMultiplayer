@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="344dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="8dp"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/dialog_result_top_layout_success"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/result_dialog_top"
+        android:paddingBottom="24dp"
+        android:paddingTop="24dp">
+
+        <ImageView
+            android:id="@+id/image_result"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:src="@drawable/find_answer_correct"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/text_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif"
+            android:text="result"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintTop_toBottomOf="@id/image_result" />
+
+        <TextView
+            android:id="@+id/text_result_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="result_name"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif"
+            app:layout_constraintTop_toBottomOf="@id/text_result"
+            android:textAlignment="center"
+            android:layout_marginTop="8dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/text_result_name"
+            android:layout_marginTop="16dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent">
+
+            <TextView
+                android:id="@+id/pronounce_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ap·ple"
+                android:fontFamily="sans-serif"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/pronounce_2"
+                app:layout_constraintRight_toLeftOf="@id/button_result_voice"
+                />
+
+            <TextView
+                android:id="@+id/pronounce_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/ˈapəl/"
+                android:layout_marginTop="4dp"
+                android:fontFamily="sans-serif"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/pronounce_1"
+                tools:ignore="MissingConstraints" />
+
+            <ImageView
+                android:id="@+id/button_result_voice"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/find_voice"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/pronounce_1"
+                android:layout_marginLeft="40dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/button_result_ok"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/dialog_result_top_layout_success"
+        android:text="Next"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif"
+        android:textSize="24sp"
+        android:paddingTop="28dp"
+        android:paddingRight="16dp"
+        android:paddingLeft="16dp"
+        android:textStyle="bold"
+        android:paddingBottom="28dp"
+        android:background="@drawable/result_dialog_bottom" />
+
+</LinearLayout>

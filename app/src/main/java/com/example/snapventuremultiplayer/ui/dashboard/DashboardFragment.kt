@@ -1,21 +1,44 @@
 package com.example.snapventuremultiplayer.ui.dashboard
 
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.snapventuremultiplayer.R
+import com.example.snapventuremultiplayer.repository.model.QuestionsModel
+import com.example.snapventuremultiplayer.repository.model.RoomModel
 import com.example.snapventuremultiplayer.ui.home.HomeViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import toast
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.random.Random
 
 class DashboardFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
+
+    private val mRef: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+
+    var roomIds: MutableList<String> = ArrayList()
+    var questionIds: MutableList<String> = ArrayList()
+    val questionDataSet: ArrayList<QuestionsModel> = ArrayList()
+
+    // New Code
+    var questionList: ArrayList<QuestionsModel> = ArrayList()
 
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var locationButton: ImageButton
@@ -58,6 +81,144 @@ class DashboardFragment : Fragment() {
         return root
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        mode1vs1Button.setOnClickListener {
+            mode1vs1Button.isEnabled = false
+            GlobalScope.launch {
+                getAllQuestions()
+                Log.d("DashboardFragment", "Getting all question")
+            }
+        }
+    }
+
+    private suspend fun getAllQuestions() {
+        try {
+            val colRef: CollectionReference = mRef.collection("questions")
+            questionIds.clear()
+            colRef.get().addOnCompleteListener { task ->
+                for (document: QueryDocumentSnapshot in task.result!!) {
+                    questionIds.add(document.id)
+                }
+                questionIds.shuffle()
+                val questionLength = 3
+
+                val questionTemp: MutableList<String> = questionIds.subList(0, questionLength)
+                questionIds = questionTemp
+            }.await()
+
+            getQuestionData()
+
+        } catch (e: FirebaseFirestoreException) {
+            Log.d("DashboardFragment: ", e.message + "")
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private suspend fun getQuestionData() {
+        try {
+            questionDataSet.clear()
+            for (questionId: String in questionIds) {
+                val questionRef: DocumentReference =
+                        mRef.collection("questions").document(questionId)
+                questionRef.get().addOnSuccessListener { documents ->
+                    val questionModel: QuestionsModel =
+                            documents.toObject(QuestionsModel::class.java)!!
+                    questionDataSet.add(questionModel)
+                }.await()
+            }
+
+            getAllRoomId()
+
+        } catch (e: FirebaseFirestoreException) {
+            Log.d("DashboardFragment: ", e.message + "")
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    suspend fun getAllRoomId() {
+        try {
+            val colRef: CollectionReference = mRef.collection("multiplayer")
+            colRef.get().addOnCompleteListener { task ->
+                for (document: QueryDocumentSnapshot in task.result!!) {
+                    roomIds.add(document.id)
+                }
+            }.await()
+
+//            generateRoomId()
+
+            checkRoomId(randomKey())
+
+        } catch (e: FirebaseFirestoreException) {
+
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    suspend fun checkRoomId(roomId: String) {
+        mRef.collection("multiplayer").document(roomId).get().addOnSuccessListener { doc ->
+            if (doc.exists()) {
+                GlobalScope.launch {
+                    checkRoomId(randomKey())
+                }
+            } else {
+                GlobalScope.launch {
+                    createRoomDatabase(roomId)
+                }
+            }
+        }
+
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    suspend fun generateRoomId() {
+        try {
+            val roomId = randomKey()
+            for (room_id: String in roomIds) {
+                if (room_id != roomId) {
+
+                }
+            }
+            createRoomDatabase(roomId)
+        } catch (e: FirebaseFirestoreException) {
+
+            generateRoomId()
+
+        }
+    }
+
+    private suspend fun createRoomDatabase(roomId: String) {
+        return try {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+            val roomModel = RoomModel(userId, "", -1, -1, "", false, false, roomId, questionDataSet)
+            val docRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
+            docRef.set(roomModel).addOnSuccessListener { result ->
+                Log.d("DashboardFragment: ", "$result")
+            }.await()
+
+            intentToLobby()
+
+        } catch (e: FirebaseFirestoreException) {
+
+        }
+    }
+
+    private fun intentToLobby() {
+        Log.d("DashboardFragment", "Success")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun randomKey(): String {
+        var rand_num: Int = Random.nextInt(100000, 999999)
+//        val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+//        java.util.Random().ints(2, 0, source.length)
+//                .toArray()
+//                .map(source::get)
+//                .joinToString("")
+        return rand_num.toString()
+    }
 
 
 }
