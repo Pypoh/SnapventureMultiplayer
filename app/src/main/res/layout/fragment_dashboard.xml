@@ -4,210 +4,152 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment">
+    tools:context=".ui.home.HomeFragment"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingBottom="80dp"
+    >
 
-    <ImageView
-        android:id="@+id/imageView2"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/user_info"
         android:layout_width="match_parent"
-        android:layout_height="71dp"
-        android:layout_marginStart="-260dp"
-        android:layout_marginTop="26dp"
-        android:src="@drawable/profilepicture"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginLeft="16dp" />
-
-    <TextView
-        android:id="@+id/namaUser"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="380dp"
-        android:layout_marginTop="26dp"
-        android:text="Player name"
-        android:textSize="22dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginLeft="380dp" />
+        app:layout_constraintTop_toTopOf="parent">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageView2"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/profilepicture"/>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            app:layout_constraintLeft_toRightOf="@id/imageView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:paddingLeft="24dp">
+            <TextView
+                android:id="@+id/namaUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Player name"
+                android:textSize="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/imageView2"/>
+            <TextView
+                android:id="@+id/levelUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lvl 1"
+                android:textSize="16dp"
+                app:layout_constraintStart_toStartOf="@id/imageView2"
+                app:layout_constraintTop_toBottomOf="@id/namaUser"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/pangkat_2"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <TextView
-        android:id="@+id/levelUser"
-        android:layout_width="wrap_content"
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/location_select"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="380dp"
-        android:layout_marginLeft="376dp"
-        android:layout_marginTop="64dp"
-        android:text="Lvl 1"
-        android:textSize="20dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/lokasi"
-        android:layout_width="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/user_info"
+        android:layout_marginTop="16dp">
+        <TextView
+            android:id="@+id/lokasi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/lokasiMain"
+            android:paddingBottom="16dp"/>
+        <ImageButton
+            app:layout_constraintTop_toBottomOf="@id/lokasi"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:id="@+id/lokasiMain"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:background="@drawable/location" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/modeLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="300dp"
-        android:layout_marginLeft="300dp"
-        android:layout_marginTop="124dp"
-        android:text="LOCATION"
-        android:textSize="25dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/location_select">
+        <TextView
+            android:id="@+id/modeMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Game Modes"
+            android:layout_marginTop="16dp"
+            android:textStyle="bold"
+            android:textSize="25dp"
+            app:layout_constraintTop_toTopOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            app:layout_constraintTop_toBottomOf="@id/modeMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:id="@+id/listLayout">
+            <ImageButton
+                android:id="@+id/btn1vs1"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/vs1"
+                app:layout_constraintLeft_toLeftOf="parent"/>
+            <ImageButton
+                android:id="@+id/btn2vs2"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/vs2"
+                app:layout_constraintRight_toLeftOf="@id/btn3vs3"
+                app:layout_constraintLeft_toRightOf="@id/btn1vs1"/>
+            <ImageButton
+                android:id="@+id/btn3vs3"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/vs3"
+                app:layout_constraintRight_toRightOf="parent"/>
+            <ImageButton
+                android:id="@+id/btncreateRoom"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/create"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toBottomOf="@id/btn1vs1"
+                app:layout_constraintLeft_toLeftOf="parent"/>
+            <ImageButton
+                android:id="@+id/btnjoinRoom"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/join"
+                android:layout_marginTop="24dp"
+                app:layout_constraintLeft_toRightOf="@id/btncreateRoom"
+                app:layout_constraintTop_toBottomOf="@id/btn2vs2"
+                app:layout_constraintRight_toLeftOf="@id/btnfreeRoom"/>
+            <ImageButton
+                android:id="@+id/btnfreeRoom"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/freeroam"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toBottomOf="@id/btn3vs3"
+                app:layout_constraintRight_toRightOf="parent"/>
 
-    <ImageButton
-        app:layout_constraintTop_toBottomOf="@id/lokasi"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:id="@+id/lokasiMain"
-        android:layout_width="348dp"
-        android:layout_height="91dp"
-        android:background="@drawable/lokasi"
-        tools:layout_editor_absoluteX="39dp"
-        tools:layout_editor_absoluteY="168dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/modeMain"
-        android:layout_width="169dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="296dp"
-        android:layout_marginLeft="296dp"
-        android:layout_marginTop="288dp"
-        android:text="GAME MODES"
-        android:textSize="25dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/btn3vs3"
-        android:layout_width="103dp"
-        android:layout_height="99dp"
-        android:background="@drawable/vs"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="162dp"
-        tools:layout_editor_absoluteY="346dp" />
-
-    <ImageButton
-        android:id="@+id/btncreateRoom"
-        android:layout_width="103dp"
-        android:layout_height="99dp"
-        android:background="@drawable/tambahruang"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="40dp"
-        tools:layout_editor_absoluteY="485dp" />
-
-    <ImageButton
-        android:id="@+id/btn2vs2"
-        android:layout_width="103dp"
-        android:layout_height="99dp"
-        android:background="@drawable/vs"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="284dp"
-        tools:layout_editor_absoluteY="346dp" />
-
-    <ImageButton
-        android:id="@+id/btn1vs1"
-        android:layout_width="103dp"
-        android:layout_height="99dp"
-        android:background="@drawable/vs"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="40dp"
-        tools:layout_editor_absoluteY="346dp" />
-
-    <ImageButton
-        android:id="@+id/btnfreeRoom"
-        android:layout_width="103dp"
-        android:layout_height="99dp"
-        android:background="@drawable/global"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="284dp"
-        tools:layout_editor_absoluteY="485dp" />
-
-    <TextView
-        android:id="@+id/textCreateRoom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="288dp"
-        android:layout_marginLeft="288dp"
-        android:layout_marginTop="580dp"
-        android:text="Create Room"
-        android:textSize="20dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/textFreeroom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="544dp"
-        android:layout_marginLeft="544dp"
-        android:layout_marginTop="580dp"
-        android:text="Free Room"
-        android:textSize="20dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/btnjoinRoom"
-        android:layout_width="103dp"
-        android:layout_height="99dp"
-        android:background="@drawable/join"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="162dp"
-        tools:layout_editor_absoluteY="485dp" />
-
-    <TextView
-        android:id="@+id/textJoinRoom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="420dp"
-        android:layout_marginLeft="420dp"
-        android:layout_marginTop="580dp"
-        android:text="Join Room"
-        android:textSize="20dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/text2vs2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="440dp"
-        android:layout_marginLeft="440dp"
-        android:layout_marginTop="440dp"
-        android:text="2 vs 2"
-        android:textSize="20dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/text1vs1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="320dp"
-        android:layout_marginLeft="320dp"
-        android:layout_marginTop="440dp"
-        android:text="1 vs 1"
-        android:textSize="20dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/text3vs3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="568dp"
-        android:layout_marginLeft="568dp"
-        android:layout_marginTop="440dp"
-        android:text="3 vs 3"
-        android:textSize="20dp"
-        app:layout_constraintStart_toStartOf="@id/imageView2"
-        app:layout_constraintTop_toTopOf="parent" />
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <ImageButton
         android:id="@+id/btnQuickStart"
-        android:layout_width="425dp"
-        android:layout_height="227dp"
-        android:background="@drawable/quick"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="-7dp"
-        tools:layout_editor_absoluteY="559dp" />
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:background="@drawable/quickmatch"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

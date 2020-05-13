@@ -15,7 +15,6 @@ class RegisterViewModel(private val useCase: IRegister) : ViewModel() {
     // Variables
     var email: MutableLiveData<String> = MutableLiveData()
     var name: MutableLiveData<String> = MutableLiveData()
-    var nim: MutableLiveData<String> = MutableLiveData()
     var password: MutableLiveData<String> = MutableLiveData()
     var passwordConf: MutableLiveData<String> = MutableLiveData()
 
@@ -27,14 +26,23 @@ class RegisterViewModel(private val useCase: IRegister) : ViewModel() {
             try {
                 // Handle Register
                 val registerAuthResult: Resource<AuthResult?> =
-                    useCase.registerWithEmailAndPassword(
-                        email = email.value!!,
-                        password = password.value!!
-                    )
+                        useCase.registerWithEmailAndPassword(
+                                email = email.value!!,
+                                password = password.value!!
+                        )
+
                 emit(registerAuthResult)
             } catch (e: Exception) {
                 emit(Resource.Failure(e.cause!!))
             }
         }
+    }
+
+    fun insertDataToDatabase() {
+        useCase.insertUserData(
+                email = email.value!!,
+                name = name.value!!
+        )
+
     }
 }

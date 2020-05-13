@@ -105,6 +105,7 @@ class RegisterFragment : Fragment() {
                     // TODO: Intent ke main
                     requireContext().toast("Success")
                     if (alertDialog.isShowing) alertDialog.dismiss()
+                    registerViewModel.insertDataToDatabase()
                     intentToMain()
                 }
 

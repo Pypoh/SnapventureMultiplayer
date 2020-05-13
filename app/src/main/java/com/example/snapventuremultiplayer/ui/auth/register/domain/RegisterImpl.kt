@@ -10,4 +10,8 @@ class RegisterImpl(private val registerRepository: IRegisterRepo) : IRegister {
         email: String,
         password: String
     ): Resource<AuthResult?> = registerRepository.registerWithEmailAndPassword(email, password)
+
+    override fun insertUserData(name: String, email: String) {
+        registerRepository.insertUserData(name, email)
+    }
 }

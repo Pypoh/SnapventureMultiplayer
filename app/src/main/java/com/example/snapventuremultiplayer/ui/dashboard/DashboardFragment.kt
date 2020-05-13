@@ -25,18 +25,12 @@ class DashboardFragment : Fragment() {
     private lateinit var joinRoomButton: Button
     private lateinit var freeRoomButton: Button
     private lateinit var quickStartButton: Button
-    private lateinit var PlayerName:TextView
-    private lateinit var LevelPlayer:TextView
-    private lateinit var TextLokasi:TextView
-    private lateinit var Textmodee:TextView
-    private lateinit var Text1vs1:TextView
-    private lateinit var Text2vs2:TextView
-    private lateinit var Text3vs3:TextView
-    private lateinit var TextCreate:TextView
-    private lateinit var TextJoin:TextView
-    private lateinit var TextFree:TextView
+    private lateinit var PlayerName: TextView
+    private lateinit var LevelPlayer: TextView
+    private lateinit var TextLokasi: TextView
+    private lateinit var Textmodee: TextView
 
-    private fun setupViewBinding(view: View){
+    private fun setupViewBinding(view: View) {
         locationButton = view.findViewById(R.id.lokasiMain)
         mode1vs1Button = view.findViewById(R.id.btn1vs1)
         mode2vs2Button = view.findViewById(R.id.btn2vs2)
@@ -46,26 +40,23 @@ class DashboardFragment : Fragment() {
         freeRoomButton = view.findViewById(R.id.btnfreeRoom)
         quickStartButton = view.findViewById(R.id.btnQuickStart)
         PlayerName = view.findViewById(R.id.namaUser)
-        LevelPlayer= view.findViewById(R.id.levelUser)
-        TextLokasi= view.findViewById(R.id.lokasi)
-        Textmodee= view.findViewById(R.id.modeMain)
-        Text1vs1= view.findViewById(R.id.text1vs1)
-        Text2vs2= view.findViewById(R.id.text2vs2)
-        Text3vs3= view.findViewById(R.id.text3vs3)
-        TextCreate= view.findViewById(R.id.textCreateRoom)
-        TextJoin= view.findViewById(R.id.textJoinRoom)
-        TextFree= view.findViewById(R.id.textFreeroom)
+        LevelPlayer = view.findViewById(R.id.levelUser)
+        TextLokasi = view.findViewById(R.id.lokasi)
+        Textmodee = view.findViewById(R.id.modeMain)
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         dashboardViewModel =
-            ViewModelProvider(this).get(DashboardViewModel::class.java)
+                ViewModelProvider(this).get(DashboardViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-
+        setupViewBinding(root)
         return root
     }
+
+
+
 }
