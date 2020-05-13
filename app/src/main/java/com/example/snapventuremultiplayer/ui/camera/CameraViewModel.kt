@@ -14,19 +14,26 @@ import com.example.snapventuremultiplayer.ui.camera.domain.score.IScore
 import com.example.snapventuremultiplayer.utils.Constants
 import com.example.snapventuremultiplayer.utils.viewobject.Resource
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.Exception
 
 class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCase: IScore) :
-    ViewModel() {
+        ViewModel() {
 
-    val playerNumber: MutableLiveData<Int> = MutableLiveData()
+    private val playerNumber: MutableLiveData<Int> = MutableLiveData()
     val score: MutableLiveData<Int> = MutableLiveData()
 
     val lives: MutableLiveData<Int> = MutableLiveData()
+
+    var opponentFinish: MutableLiveData<Boolean> = MutableLiveData()
+
 
     // Gameplay
     var currentStage: MutableLiveData<Int> = MutableLiveData()
@@ -41,12 +48,14 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
 
     val userID = "id1"
 
+    var opponentStatus: Boolean? = null
+
     fun detectFromBitmap(context: Context, bitmap: Bitmap) {
         detectionData = liveData(Dispatchers.IO) {
             emit(Resource.Loading())
             try {
                 val detectionResult: Resource<List<FirebaseVisionImageLabel>?> =
-                    cameraUseCase.detectFromBitmap(context, bitmap)
+                        cameraUseCase.detectFromBitmap(context, bitmap)
                 emit(detectionResult)
             } catch (e: Exception) {
                 emit(Resource.Failure(e.cause!!))
@@ -82,13 +91,15 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
                 currentStage.value = tempCurrentStage
             }
 
+            Log.d("CameraViewModel: ", "Stage Updated to: ${currentStage.value}")
+
         } catch (e: Exception) {
             Log.d("CameraViewModel: ", "Error: ${e.message}")
         }
     }
 
-    fun setTimer() {
-        timer = object: CountDownTimer(Constants.RIDDLE_STAGE_TIMEOUT, 1000) {
+    private fun setTimer() {
+        timer = object : CountDownTimer(Constants.RIDDLE_STAGE_TIMEOUT, 1000) {
             override fun onFinish() {
                 // When finished, check next riddle
                 Log.d("CameraViewModel: ", "Next Round")
@@ -96,7 +107,7 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
 
             override fun onTick(millisUntilFinished: Long) {
                 // Set 5 sec left notification
-                Log.d("CameraViewModel: ", "$millisUntilFinished sec")
+//                Log.d("CameraViewModel: ", "$millisUntilFinished sec")
             }
         }.start()
     }
@@ -106,9 +117,12 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
     }
 
     fun nextStage() {
+        val currentStageValue = currentStage.value
+        Log.d("CameraViewModel: ", "currentStage: ${currentStage.value}")
         // Check if final stage
-        if (currentStage.value == getStageSize()) {
+        if (currentStageValue!!.plus(1) == getStageSize()) {
             processFinalResult()
+            Log.d("CameraViewModel: ", "Last Stage Initiated")
             return
         }
 
@@ -126,6 +140,43 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
         viewModelScope.launch(Dispatchers.IO) {
             if (playerNumber != null) {
                 score.value?.let { scoreUseCase.postScore(roomID, playerNumber, it) }
+
+                listenToScore()
+            }
+        }
+    }
+
+    private fun listenToScore() {
+        opponentFinish.postValue(false)
+        Log.d("CameraViewModelData: ", "snapshot initiated: ${opponentFinish.value}")
+
+        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+        val roomID = roomData.value!!.roomID
+        val roomRef = db.collection("multiplayer").document(roomID)
+
+        roomRef.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                val roomModelResult = snapshot.toObject(RoomModel::class.java)
+
+                if (playerNumber.value == 1) {
+                    if (roomModelResult!!.scorePlayer2 > -1) {
+                        GlobalScope.launch {
+                            opponentFinish.postValue(true)
+                            Log.d("CameraViewModelData: ", "snapshot change: ${opponentFinish.value}")
+                        }
+                    }
+                } else {
+                    if (roomModelResult!!.scorePlayer1 > -1) {
+                        GlobalScope.launch {
+                            opponentFinish.postValue(true)
+                        }
+                    }
+                }
+
             }
         }
     }

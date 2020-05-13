@@ -1,14 +1,15 @@
 package com.example.snapventuremultiplayer.ui.dashboard
 
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.snapventuremultiplayer.R
 import com.example.snapventuremultiplayer.repository.model.QuestionsModel
@@ -33,6 +34,9 @@ class DashboardFragment : Fragment() {
     var roomIds: MutableList<String> = ArrayList()
     var questionIds: MutableList<String> = ArrayList()
     val questionDataSet: ArrayList<QuestionsModel> = ArrayList()
+
+    // New Code
+    var questionList: ArrayList<QuestionsModel> = ArrayList()
 
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var locationButton: ImageButton
@@ -74,38 +78,42 @@ class DashboardFragment : Fragment() {
         setupViewBinding(root)
         return root
     }
-
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         mode1vs1Button.setOnClickListener {
+            mode1vs1Button.isEnabled = false
             GlobalScope.launch {
                 getAllQuestions()
-                getAllRoomId()
+                Log.d("DashboardFragment", "Getting all question")
             }
         }
     }
-
-    suspend fun getAllQuestions() {
-        return try {
+    private suspend fun getAllQuestions() {
+        try {
             val colRef: CollectionReference = mRef.collection("questions")
             questionIds.clear()
             colRef.get().addOnCompleteListener { task ->
-                for (document: QueryDocumentSnapshot in task.getResult()!!) {
+                for (document: QueryDocumentSnapshot in task.result!!) {
                     questionIds.add(document.id)
                 }
-                Collections.shuffle(questionIds)
-                var questionLength = 3
+                questionIds.shuffle()
+                val questionLength = 3
 
-                var questionTemp: MutableList<String> = questionIds.subList(0, questionLength)
+                val questionTemp: MutableList<String> = questionIds.subList(0, questionLength)
                 questionIds = questionTemp
             }.await()
+
             getQuestionData()
+
         } catch (e: FirebaseFirestoreException) {
+            Log.d("DashboardFragment: ", e.message + "")
         }
     }
 
-    suspend fun getQuestionData() {
-        return try {
+    @RequiresApi(Build.VERSION_CODES.N)
+    private suspend fun getQuestionData() {
+        try {
             questionDataSet.clear()
             for (questionId: String in questionIds) {
                 val questionRef: DocumentReference =
@@ -122,25 +130,49 @@ class DashboardFragment : Fragment() {
 
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.N)
     suspend fun getAllRoomId() {
-        return try {
+        try {
             val colRef: CollectionReference = mRef.collection("multiplayer")
             colRef.get().addOnCompleteListener { task ->
-                for (document: QueryDocumentSnapshot in task.getResult()!!) {
+                for (document: QueryDocumentSnapshot in task.result!!) {
                     roomIds.add(document.id)
                 }
             }.await()
-            generateRoomId()
+
+//            generateRoomId()
+
+            checkRoomId(randomKey())
+
         } catch (e: FirebaseFirestoreException) {
 
         }
     }
+    @RequiresApi(Build.VERSION_CODES.N)
+    suspend fun checkRoomId(roomId: String) {
+        mRef.collection("multiplayer").document(roomId).get().addOnSuccessListener { doc ->
+            if (doc.exists()) {
+                GlobalScope.launch {
+                    checkRoomId(randomKey())
+                }
+            } else {
+                GlobalScope.launch {
+                    createRoomDatabase(roomId)
+                }
+            }
+        }
 
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
     suspend fun generateRoomId() {
-        return try {
-            var roomId = randomKey()
+        try {
+            val roomId = randomKey()
             for (room_id: String in roomIds) {
-                if (!room_id.equals(roomId)) {
+                if (room_id != roomId) {
+
                 }
             }
             createRoomDatabase(roomId)
@@ -150,33 +182,26 @@ class DashboardFragment : Fragment() {
     }
 
     suspend fun createRoomDatabase(roomId: String) {
-        return try {
-            val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
-            val roomModel = RoomModel(userId, "", -1, -1, "", false, false, roomId, questionDataSet)
-            val docRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
-            docRef.set(roomModel).addOnSuccessListener { result ->
-            }.await()
-            intentToLobby()
-        } catch (e: FirebaseFirestoreException) {
 
-        }
+            generateRoomId()
+
+
     }
 
     private fun intentToLobby() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun randomKey(): String {
-        var rand_num: Int = Random.nextInt(10000, 100000)
-        val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        java.util.Random().ints(2, 0, source.length)
-                .toArray()
-                .map(source::get)
-                .joinToString("")
-        val roomId = rand_num.toString() + source
-        return roomId
+        var rand_num: Int = Random.nextInt(100000, 999999)
+//        val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+//        java.util.Random().ints(2, 0, source.length)
+//                .toArray()
+//                .map(source::get)
+//                .joinToString("")
+        return rand_num.toString()
     }
-
 
 
 }

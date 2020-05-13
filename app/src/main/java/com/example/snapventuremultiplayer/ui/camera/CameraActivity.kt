@@ -1,32 +1,32 @@
 package com.example.snapventuremultiplayer.ui.camera
 
+import android.app.Dialog
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
+import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
-import android.widget.ViewSwitcher
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraControl
-import androidx.camera.core.CameraInfo
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.snapventuremultiplayer.R
 import com.example.snapventuremultiplayer.databinding.ActivityCameraBinding
-import com.example.snapventuremultiplayer.repository.datasource.remote.auth.other.AuthRepoImpl
 import com.example.snapventuremultiplayer.repository.datasource.remote.firestore.matchmaking.MatchmakingRepoImpl
 import com.example.snapventuremultiplayer.repository.datasource.remote.mlkit.imagelabeling.ImageLabelingRepoImpl
 import com.example.snapventuremultiplayer.repository.model.RoomModel
-import com.example.snapventuremultiplayer.ui.auth.domain.AuthImpl
 import com.example.snapventuremultiplayer.ui.camera.domain.camera.CameraImpl
 import com.example.snapventuremultiplayer.ui.camera.domain.score.ScoreImpl
 import com.example.snapventuremultiplayer.utils.Constants.Companion.CAMERA_REQUEST_CODE_PERMISSIONS
@@ -41,16 +41,21 @@ import com.otaliastudios.cameraview.PictureResult
 import com.otaliastudios.cameraview.gesture.Gesture
 import com.otaliastudios.cameraview.gesture.GestureAction
 import toast
-import java.util.concurrent.Executors
+import java.util.*
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
     private lateinit var countDownTimer: CountDownTimer
+    private lateinit var resultDialog: Dialog
+    private lateinit var passDialog: Dialog
+    private lateinit var waitingDialog: Dialog
+
+    private lateinit var textToSpeech: TextToSpeech
 
     private val cameraViewModel: CameraViewModel by lazy {
         ViewModelProvider(
-            this,
-            CameraVMFactory(CameraImpl(ImageLabelingRepoImpl()), ScoreImpl(MatchmakingRepoImpl()))
+                this,
+                CameraVMFactory(CameraImpl(ImageLabelingRepoImpl()), ScoreImpl(MatchmakingRepoImpl()))
         ).get(CameraViewModel::class.java)
     }
 
@@ -80,6 +85,7 @@ class CameraActivity : AppCompatActivity() {
         // Setup Lives
         cameraViewModel.lives.value = 5
         cameraViewModel.score.value = 0
+        cameraViewModel.opponentFinish.value = true
 
         // Set Stage game in viewModel
         cameraViewModel.setStage(0)
@@ -97,6 +103,21 @@ class CameraActivity : AppCompatActivity() {
 
         // Setup Progress Bar
         // TODO: Smooth Horizontal Progress Bar
+
+        // Listen to opponent
+        listenToOpponentState()
+    }
+
+    private fun listenToOpponentState() {
+        cameraViewModel.opponentFinish?.observe(this, Observer { state ->
+            if (!state) {
+                createWaitingDialog()
+            } else {
+                if (waitingDialog.isShowing) {
+                    waitingDialog.dismiss()
+                }
+            }
+        })
     }
 
     private fun getIntentExtras() {
@@ -105,6 +126,9 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
+        // Dialog
+        waitingDialog = Dialog(this)
+
         // Camera
         cameraPreview = binding.cameraView
         cameraPreview.setLifecycleOwner(this)
@@ -137,10 +161,10 @@ class CameraActivity : AppCompatActivity() {
             val riddleTextView = TextView(binding.popupRiddleCamera.root.context)
             riddleTextView.textAlignment = View.TEXT_ALIGNMENT_CENTER
             riddleTextView.setTextColor(
-                ContextCompat.getColor(
-                    applicationContext,
-                    R.color.white
-                )
+                    ContextCompat.getColor(
+                            applicationContext,
+                            R.color.white
+                    )
             )
             riddleTextView.textSize = 16f
             riddleTextView
@@ -148,9 +172,27 @@ class CameraActivity : AppCompatActivity() {
 
         // Riddle Popup Pass Button
         binding.popupRiddleCamera.textPassButton.setOnClickListener {
-            cameraViewModel.currentStage.value?.plus(1)
-                ?.let { stageNumber -> cameraViewModel.setStage(stageNumber) }
+            passValidator()
         }
+    }
+
+    private fun passValidator() {
+        passDialog = Dialog(this)
+        passDialog.setContentView(R.layout.dialog_pass)
+        passDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        val noButton = passDialog.findViewById<Button>(R.id.button_pass_no)
+        noButton.setOnClickListener {
+            passDialog.dismiss()
+        }
+
+        val yesButton = passDialog.findViewById<Button>(R.id.button_pass_ya)
+        yesButton.setOnClickListener {
+            passDialog.dismiss()
+            cameraViewModel.nextStage()
+            cameraViewModel.resetTimer()
+        }
+
+        passDialog.show()
     }
 
     private fun analyzeImage(bitmap: Bitmap) {
@@ -167,26 +209,29 @@ class CameraActivity : AppCompatActivity() {
                     var answered = false
                     loop@ for (result in task.data!!) {
                         Log.d(
-                            "CameraActivity: ",
-                            "Result: ${result.text}, Confidence: ${result.confidence}"
+                                "CameraActivity: ",
+                                "Result: ${result.text}, Confidence: ${result.confidence}"
                         )
 
                         Log.d(
-                            "CameraActivity: ",
-                            "Result: ${result.text}, Expected: ${cameraViewModel.currentAnswer.value}"
+                                "CameraActivity: ",
+                                "Result: ${result.text}, Expected: ${cameraViewModel.currentAnswer.value}"
                         )
 
                         // Process Result
                         when (result.text) {
                             cameraViewModel.currentAnswer.value -> {
+
                                 cameraViewModel.resetTimer()
                                 cameraViewModel.nextStage()
                                 cameraViewModel.increaseScore()
                                 answered = true
                                 Log.d(
-                                    "CameraActivity: ",
-                                    "Correct Answer, Result: ${result.text}, Going into next round..."
+                                        "CameraActivity: ",
+                                        "Correct Answer, Result: ${result.text}, Going into next round..."
                                 )
+
+                                createResultDialog(result.text, true, null)
                                 break@loop
                             }
                         }
@@ -202,8 +247,9 @@ class CameraActivity : AppCompatActivity() {
                             else -> {
                                 // Show Wrong Dialog here
                                 // TODO: Show Wrong Dialog
-                                toast("Wrong answer, current live: ${cameraViewModel.lives.value}")
+//                                toast("Wrong answer, current live: ${cameraViewModel.lives.value}")
                                 cameraViewModel.decreaseLive(1)
+                                createResultDialog(null, false, cameraViewModel.lives.value)
                             }
                         }
                     }
@@ -224,22 +270,106 @@ class CameraActivity : AppCompatActivity() {
         })
     }
 
+    private fun createResultDialog(result: String?, correctAnswer: Boolean, remainingLives: Int?) {
+        resultDialog = Dialog(this)
+        resultDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        if (correctAnswer) {
+            resultDialog.setContentView(R.layout.dialog_result_success)
+            resultDialog.setCancelable(false)
+            resultDialog.setCanceledOnTouchOutside(false)
+
+            val pronounceTextView1: TextView = resultDialog.findViewById(R.id.pronounce_1)
+            val pronounceTextView2: TextView = resultDialog.findViewById(R.id.pronounce_2)
+            val resultTextView: TextView = resultDialog.findViewById(R.id.text_result_name)
+
+            val vowel = checkVowel(result!!)
+            val resultFormat = "That is $vowel $result"
+            resultTextView.text = resultFormat
+            pronounceTextView1.text = result
+            pronounceTextView2.text = result
+
+            textToSpeech = TextToSpeech(applicationContext, TextToSpeech.OnInitListener { status ->
+                if (status != TextToSpeech.ERROR) {
+                    textToSpeech.language = Locale.US
+                }
+            })
+
+            // Button
+            val nextButton = resultDialog.findViewById<Button>(R.id.button_result_ok)
+            nextButton.setOnClickListener {
+                resultDialog.dismiss()
+            }
+
+            val speechButton = resultDialog.findViewById<ImageView>(R.id.button_result_voice)
+            speechButton.setOnClickListener {
+                textToSpeech.speak(result, TextToSpeech.QUEUE_FLUSH, null)
+            }
+        } else {
+            resultDialog.setContentView(R.layout.dialog_result_fail)
+            resultDialog.setCancelable(false)
+            resultDialog.setCanceledOnTouchOutside(false)
+
+            val textFail = resultDialog.findViewById<TextView>(R.id.text_result_fail)
+            val textFailFormat = "Oops, Almost There.\n$remainingLives live remaining"
+            textFail.text = textFailFormat
+            val nextButton = resultDialog.findViewById<Button>(R.id.button_result_ok)
+            nextButton.setOnClickListener {
+                resultDialog.dismiss()
+                Log.d("resultDialog", "Result Button Pressed")
+            }
+        }
+
+        resultDialog.setOnShowListener {
+//            snapLayout.setVisibility(View.GONE)
+            cameraPreview.close()
+        }
+
+        resultDialog.setOnDismissListener {
+//            snapLayout.setVisibility(View.VISIBLE)
+            cameraPreview.open()
+        }
+
+        resultDialog.show()
+    }
+
+    private fun checkVowel(vowel: String): String? {
+        val firstLetter = vowel[0]
+        return if (firstLetter == 'a' || firstLetter == 'i' || firstLetter == 'u' || firstLetter == 'e' || firstLetter == 'o') {
+            "an"
+        } else "a"
+    }
+
+    private fun createWaitingDialog() {
+        waitingDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        waitingDialog.setContentView(R.layout.dialog_waiting_opponent_finish)
+        waitingDialog.setCancelable(false)
+        waitingDialog.setCanceledOnTouchOutside(false)
+
+        // Create animation
+        val bounceAnimation = AnimationUtils.loadAnimation(this, R.anim.bounce_animation)
+        val logoView = waitingDialog.findViewById<ImageView>(R.id.loading_logo)
+        logoView.startAnimation(bounceAnimation)
+
+        waitingDialog.show()
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
     private fun permissionRequest() {
         if (allPermissionsGranted()) {
 //            cameraPreview.post { startCamera() }
         } else {
             requestPermissions(
-                REQUIRED_PERMISSIONS,
-                CAMERA_REQUEST_CODE_PERMISSIONS
+                    REQUIRED_PERMISSIONS,
+                    CAMERA_REQUEST_CODE_PERMISSIONS
             )
         }
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_REQUEST_CODE_PERMISSIONS) {
