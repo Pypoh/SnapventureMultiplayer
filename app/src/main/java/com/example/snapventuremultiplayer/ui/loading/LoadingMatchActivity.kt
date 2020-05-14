@@ -18,14 +18,10 @@ import com.example.snapventuremultiplayer.ui.camera.CameraActivity
 import com.example.snapventuremultiplayer.ui.loading.domain.LoadingMatchImpl
 import com.example.snapventuremultiplayer.utils.Constants.Companion.EXTRA_ROOM_DATA
 import com.example.snapventuremultiplayer.utils.viewobject.Resource
+import com.google.android.material.imageview.ShapeableImageView
 import toast
 
 class LoadingMatchActivity : AppCompatActivity() {
-
-    // Test Room ID
-    val dummyRoomID = "dV9Ph9wMyEBmjdrHMbrs"
-
-
 
     // View Model
     private val loadingMatchViewModel: LoadingMatchViewModel by lazy {
@@ -38,6 +34,8 @@ class LoadingMatchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_loading_match)
+
+
 
         val intent: Intent = getIntent()
         val status = intent.getStringExtra("STATUS")
