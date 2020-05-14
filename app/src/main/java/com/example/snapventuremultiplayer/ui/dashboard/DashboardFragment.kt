@@ -39,6 +39,7 @@ class DashboardFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
 
+    private val mAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val mRef: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
     var roomIds: MutableList<String> = ArrayList()
@@ -65,7 +66,6 @@ class DashboardFragment : Fragment() {
     // New Code Atifa
     private lateinit var codeEditText: EditText
     private var roomName = ""
-    private lateinit var preferences: SharedPreferences
 
     private fun setupViewBinding(view: View) {
         locationButton = view.findViewById(R.id.lokasiMain)
@@ -83,12 +83,12 @@ class DashboardFragment : Fragment() {
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         dashboardViewModel =
-                ViewModelProvider(this).get(DashboardViewModel::class.java)
+            ViewModelProvider(this).get(DashboardViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
         setupViewBinding(root)
         return root
@@ -97,8 +97,8 @@ class DashboardFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mode1vs1Button.setOnClickListener {
-            mode1vs1Button.isEnabled = false
+        createRoomButton.setOnClickListener {
+            createRoomButton.isEnabled = false
             GlobalScope.launch {
                 getAllQuestions()
                 Log.d("DashboardFragment", "Getting all question")
@@ -107,37 +107,47 @@ class DashboardFragment : Fragment() {
 
         //button join klik keluar alert dialog
         joinRoomButton.setOnClickListener {
-            //Edit text di alert dialog
-            codeEditText = EditText(context)
-            codeEditText.setPadding(
-                    resources.getDimensionPixelOffset(R.dimen.activity_horizontal_margin), 0,
-                    resources.getDimensionPixelOffset(R.dimen.activity_horizontal_margin), 0
-            )
-            codeEditText.hint = "Room Code"
-            val alert = AlertDialog.Builder(context)
-                    .setTitle("Join Room")
-                    .setView(codeEditText)
-                    .setMessage("Please enter the room Code")
-                    //set positif button
-                    .setPositiveButton("Join") { dialog, _ ->
-                        //simpen data yang dimasukkin di edittext ke var roomname
-                        roomName = codeEditText.text.toString()
-                        Log.d("DashboardFragment: ", "$roomName joining...")
-                        codeEditText.setText("") //set text jd kosongan
-                        if (roomName != "") { //kalo ngga kosong
-                            addEventListener(roomName)
-                            Log.d("DashboardFragment: ", "$roomName adding event")
-                        }
-                        dialog.cancel()
-                    }
-                    .setNegativeButton("Cancel") { dialog, _ ->
-                        dialog.cancel()
-                    }.create()
-            alert.show()
+            GlobalScope.launch {
+                showDialogJoinRoom()
+            }
         }
     }
 
-    private fun addEventListener(roomId: String) {
+    private suspend fun showDialogJoinRoom() {
+        //Edit text di alert dialog
+        codeEditText = EditText(context)
+        codeEditText.setPadding(
+            resources.getDimensionPixelOffset(R.dimen.activity_horizontal_margin), 0,
+            resources.getDimensionPixelOffset(R.dimen.activity_horizontal_margin), 0
+        )
+        codeEditText.hint = "Room Code"
+        val alert = AlertDialog.Builder(context)
+            .setTitle("Join Room")
+            .setView(codeEditText)
+            .setMessage("Please enter the room Code")
+            //set positif button
+            .setPositiveButton("Join") { dialog, _ ->
+                //simpen data yang dimasukkin di edittext ke var roomname
+                roomName = codeEditText.text.toString()
+                Log.d("DashboardFragment: ", "$roomName joining...")
+                codeEditText.setText("") //set text jd kosongan
+                if (roomName != "") { //kalo ngga kosong
+                    GlobalScope.launch {
+                        addEventListener(roomName)
+                    }
+                    Log.d("DashboardFragment: ", "$roomName adding event")
+                }
+                dialog.cancel()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.cancel()
+            }.create()
+        alert.show()
+    }
+
+    private suspend fun addEventListener(roomId: String) {
+        val userId = mAuth.currentUser?.uid
+        var player_status = "0"
         //read from database firestore
 //        mRef.collection("multiplayer")
 //                .get()
@@ -164,12 +174,16 @@ class DashboardFragment : Fragment() {
         mRef.collection("multiplayer").document(roomId).get().addOnSuccessListener { doc ->
             if (doc.exists()) {
                 Log.d("Dashboard checkRoom", "Room Found")
-                val player_status: Int = 2
-                intentToLobby(player_status)
+                player_status = "2"
             } else {
                 Log.d("Dashboard checkRoom", "Room Not Found")
             }
-        }
+        }.await()
+        val docRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
+        docRef.update("userIdPlayer2", userId).addOnSuccessListener { task ->
+
+        }.await()
+        intentToLobby(player_status, roomId)
     }
 
     private suspend fun getAllQuestions() {
@@ -200,10 +214,10 @@ class DashboardFragment : Fragment() {
             questionDataSet.clear()
             for (questionId: String in questionIds) {
                 val questionRef: DocumentReference =
-                        mRef.collection("questions").document(questionId)
+                    mRef.collection("questions").document(questionId)
                 questionRef.get().addOnSuccessListener { documents ->
                     val questionModel: QuestionsModel =
-                            documents.toObject(QuestionsModel::class.java)!!
+                        documents.toObject(QuestionsModel::class.java)!!
                     questionDataSet.add(questionModel)
                 }.await()
             }
@@ -271,32 +285,42 @@ class DashboardFragment : Fragment() {
     private suspend fun createRoomDatabase(roomId: String) {
         return try {
             val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
-            val roomModel = hashMapOf("userIdPlayer1" to userId, "userIdPlayer2" to "", "scorePlayer1" to -1, "scorePlayer2" to -1, "player1Ready" to false, "player2Ready" to false, "roomId" to roomId)
+            val roomModel = hashMapOf(
+                "userIdPlayer1" to userId,
+                "userIdPlayer2" to "",
+                "scorePlayer1" to -1,
+                "scorePlayer2" to -1,
+                "player1Ready" to false,
+                "player2Ready" to false,
+                "roomId" to roomId
+            )
 
             val docRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
             docRef.set(roomModel).addOnSuccessListener { result ->
                 Log.d("DashboardFragment: ", "$result")
             }.await()
-            for ((index, questionId:String) in questionIds.withIndex()) {
-                val docCollection: DocumentReference = docRef.collection("questions").document(questionId)
+            for ((index, questionId: String) in questionIds.withIndex()) {
+                val docCollection: DocumentReference =
+                    docRef.collection("questions").document(questionId)
                 docCollection.set(questionDataSet[index]).addOnCompleteListener { result ->
 
                 }.await()
 
             }
-            val player_status:Int = 1
-            intentToLobby(player_status)
+            val player_status: String = "1"
+            intentToLobby(player_status, roomId)
 
         } catch (e: FirebaseFirestoreException) {
 
         }
     }
 
-    private fun intentToLobby(status: Int) {
+    private fun intentToLobby(status: String, roomId: String) {
         Log.d("DashboardFragment", "Success")
 
         val intent = Intent(context, LobbyActivity::class.java)
         intent.putExtra("STATUS", status)
+        intent.putExtra("ROOMID", roomId)
         startActivity(intent)
     }
 
