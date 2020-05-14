@@ -25,6 +25,8 @@ class LoadingMatchActivity : AppCompatActivity() {
     // Test Room ID
     val dummyRoomID = "dV9Ph9wMyEBmjdrHMbrs"
 
+
+
     // View Model
     private val loadingMatchViewModel: LoadingMatchViewModel by lazy {
         ViewModelProvider(
@@ -37,12 +39,16 @@ class LoadingMatchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_loading_match)
 
-        fetchRoomData()
+        val intent: Intent = getIntent()
+        val status = intent.getStringExtra("STATUS")
+        val roomId = intent.getStringExtra("ROOMID")
+
+        fetchRoomData(status, roomId)
 
     }
 
-    private fun fetchRoomData() {
-        loadingMatchViewModel.getRoomData(dummyRoomID)
+    private fun fetchRoomData(status: String, roomId: String) {
+        loadingMatchViewModel.getRoomData(roomId)
         loadingMatchViewModel.roomData.observe(this, Observer {task ->
             when (task) {
                 is Resource.Loading -> {

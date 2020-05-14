@@ -19,13 +19,13 @@
 
     <fragment
         android:id="@+id/navigation_history"
-        android:name="com.example.snapventuremultiplayer.ui.HistoryFragment"
+        android:name="com.example.snapventuremultiplayer.HistoryFragment"
         android:label="@string/title_history"
         tools:layout="@layout/fragment_history"/>
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.example.snapventuremultiplayer.ui.ProfileFragment"
+        android:name="com.example.snapventuremultiplayer.ProfileFragment"
         android:label="@string/title_profile"
         tools:layout="@layout/fragment_profile" />
 </navigation>

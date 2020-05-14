@@ -67,8 +67,11 @@ class LobbyActivity : AppCompatActivity() {
         }
     }
 
-    private fun intentToMatchBattle() {
-        startActivity(Intent(this, LoadingMatchActivity::class.java))
+    private fun intentToMatchBattle(status: String, roomId: String) {
+        val intent = Intent(this, LoadingMatchActivity::class.java)
+        intent.putExtra("STATUS", status)
+        intent.putExtra("ROOMID", roomId)
+        startActivity(intent)
     }
 
     private fun checkPlayerAvailable(roomId: String) {
@@ -111,14 +114,14 @@ class LobbyActivity : AppCompatActivity() {
                 if (status == "1") {
                     if (snapshot.get("player2Ready")!! != "false") {
                         player2_status.text = "Ready"
-                        intentToMatchBattle()
+                        intentToMatchBattle(status, roomId)
                     } else {
                         checkReadyPlayer(roomId, status)
                     }
                 } else {
                     if (snapshot.get("player1Ready")!! != "false") {
                         player1_status.text = "Ready"
-                        intentToMatchBattle()
+                        intentToMatchBattle(status, roomId)
                     } else {
                         checkReadyPlayer(roomId, status)
                     }
