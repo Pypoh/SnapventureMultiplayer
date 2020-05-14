@@ -147,7 +147,7 @@ class DashboardFragment : Fragment() {
         Listener!!.update("userIdPlayer2",userId).addOnSuccessListener( object : OnSuccessListener<Void> {
             override fun onSuccess(void: Void) {
                 Toast.makeText(context,"Document Updated",Toast.LENGTH_LONG).show();
-                Log.d("DashboardFragment_User: ", "$userId adding event")
+                Log.d("DashboardFragment : ", "$userId adding event")
             }
             }).addOnFailureListener(object : OnFailureListener{
             override fun onFailure(e: Exception) {
