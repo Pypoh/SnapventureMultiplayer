@@ -3,6 +3,7 @@ package com.example.snapventuremultiplayer
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import com.example.snapventuremultiplayer.ui.loading.LoadingMatchActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -15,8 +16,6 @@ import kotlinx.coroutines.tasks.await
 
 class LobbyActivity : AppCompatActivity() {
 
-    lateinit var status: String
-    lateinit var roomId: String
     private val mAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val mRef: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
@@ -25,45 +24,46 @@ class LobbyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
 
-        val bundle = intent.extras
-        status = bundle?.getString("STATUS")!!
-        roomId = bundle?.getString("ROOMID")!!
+        var name = ""
+        var roomId = ""
+        var status = ""
+        var uid = ""
+        val intent: Intent = getIntent()
+        status = intent.getStringExtra("STATUS")
+        roomId = intent.getStringExtra("ROOMID")
 
-        status?.let {
-            GlobalScope.launch {
-                checkPlayer(it, roomId)
-            }
+        Log.d("STATUS", status)
+
+        tv_lobbyId.text = "ROOM ID : " + roomId
+        uid = mAuth.currentUser?.uid!!
+
+        val userRef: DocumentReference = mRef.collection("users").document(uid)
+        userRef.get().addOnSuccessListener { task ->
+            name = task.get("name").toString()
+            checkPlayer(status, roomId, name)
         }
+
+
         btn_ready.setOnClickListener {
             if (status != null) {
-                GlobalScope.launch {
-                    updateReadyStatus(roomId, status)
-                }
+                updateReadyStatus(roomId, status)
             }
         }
     }
 
-    private suspend fun checkPlayer(status: String, roomId: String) {
-        val uid = mAuth.currentUser?.uid
-        var name: String = ""
-        val userRef: DocumentReference = mRef.collection("users").document(uid.toString())
-        userRef.get().addOnSuccessListener { task ->
-            name = task.get("name").toString()
-        }.await()
+    private fun checkPlayer(status: String, roomId: String, name: String) {
         if (status == "1") {
             tv_player1.text = name
-            GlobalScope.launch {
-                checkPlayerAvailable(roomId)
-            }
-        } else {
+            Log.d("debugNama", name)
+            checkPlayerAvailable(roomId)
+        } else if (status == "2") {
             tv_player2.text = name
             btn_ready.isEnabled = true
-            var hostId = ""
             val hostRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
             hostRef.get().addOnSuccessListener { result ->
-                hostId = result.get("userIdPlayer1").toString()
-            }.await()
-            setContentPlayer(hostId, status)
+                val hostId = result.get("userIdPlayer1").toString()
+                setContentPlayer1(hostId)
+            }
         }
     }
 
@@ -71,42 +71,41 @@ class LobbyActivity : AppCompatActivity() {
         startActivity(Intent(this, LoadingMatchActivity::class.java))
     }
 
-    private suspend fun checkPlayerAvailable(roomId: String) {
+    private fun checkPlayerAvailable(roomId: String) {
         val docRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
         docRef.addSnapshotListener { snapshot, e ->
             if (snapshot != null) {
                 if (snapshot.get("userIdPlayer2")!! != "") {
                     val player2Id: String = snapshot.get("userIdPlayer2").toString()
                     btn_ready.isEnabled = true
-                    GlobalScope.launch {
-                        setContentPlayer(player2Id, status)
-                    }
+                    setContentPlayer2(player2Id)
                 }
 
             }
         }
     }
 
-    private suspend fun setContentPlayer(playerId: String, status: String) {
-        if (status == "1") {
-            val docRef: DocumentReference = mRef.collection("users").document(playerId)
-            docRef.get().addOnSuccessListener { result ->
-                val name: String = result.get("name").toString()
-                tv_player2.text = name
-            }.await()
-        } else {
-            val userRef: DocumentReference = mRef.collection("users").document(playerId)
-            userRef.get().addOnSuccessListener { result ->
-                val name: String = result.get("name").toString()
-                tv_player1.text = name
-            }
+    private fun setContentPlayer2(player2Id: String) {
+        val docRef: DocumentReference = mRef.collection("users").document(player2Id)
+        docRef.get().addOnSuccessListener { result ->
+            val name: String = result.get("name").toString()
+            tv_player2.text = name
+        }
+    }
+
+    private fun setContentPlayer1(player1Id: String) {
+        Log.d("PLAYER1ID", player1Id)
+        val userRef: DocumentReference = mRef.collection("users").document(player1Id)
+        userRef.get().addOnSuccessListener { result ->
+            val name: String = result.get("name").toString()
+            tv_player1.text = name
         }
     }
 
     private fun checkReadyPlayer(roomId: String, status: String) {
         btn_ready.isEnabled = false
 
-        val docRef: DocumentReference = mRef.document(roomId)
+        val docRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
         docRef.addSnapshotListener { snapshot, e ->
             if (snapshot != null) {
                 if (status == "1") {
@@ -128,8 +127,17 @@ class LobbyActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun updateReadyStatus(roomId: String, status: String) {
-
+    private fun updateReadyStatus(roomId: String, status: String) {
+        val userRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
+        if (status == "1") {
+            userRef.update("player1Ready", true).addOnSuccessListener { result ->
+            }
+            checkReadyPlayer(roomId, status)
+        } else {
+            userRef.update("player2Ready", true).addOnSuccessListener { result ->
+            }
+            checkReadyPlayer(roomId, status)
+        }
     }
 
 }

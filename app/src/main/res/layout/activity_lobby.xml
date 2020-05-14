@@ -86,12 +86,22 @@
                 app:layout_constraintTop_toBottomOf="@id/tv_player2" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </GridLayout>
+    <TextView
+        android:id="@+id/tv_lobbyId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ROOM ID : XXXX"
+        android:textStyle="bold"
+        android:textSize="40dp"
+        app:layout_constraintBottom_toTopOf="@id/btn_ready"
+        android:layout_marginBottom="30dp"
+        android:gravity="center"/>
 
     <Button
         android:id="@+id/btn_ready"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="80dp"
         android:text="Ready"
         android:textSize="20dp"
         android:textStyle="bold"

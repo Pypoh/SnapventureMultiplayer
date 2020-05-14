@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="344dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="8dp"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/dialog_result_top_layout_final"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/result_dialog_full"
+        android:paddingBottom="48dp"
+        android:paddingTop="48dp">
+
+        <ImageView
+            android:id="@+id/badge_result"
+            android:layout_width="match_parent"
+            android:layout_height="128dp"
+            android:src="@drawable/result_badge_gold"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/text_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif"
+            android:text="All clear!"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintTop_toBottomOf="@id/badge_result" />
+
+        <TextView
+            android:id="@+id/text_result_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hoooray!\nMission Completed"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif"
+            app:layout_constraintTop_toBottomOf="@id/text_result"
+            android:textAlignment="center"
+            android:layout_marginTop="8dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <RelativeLayout
+        android:id="@+id/dialog_result_top_layout_final_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/resultwin1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="20"
+            android:textSize="40sp"
+            android:fontFamily="sans-serif"
+            android:layout_marginLeft="90dp"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/resultwin2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="30"
+            android:textSize="40sp"
+            android:layout_marginLeft="220dp"
+            android:fontFamily="sans-serif"
+            android:layout_marginTop="8dp" />
+    </RelativeLayout>
+</LinearLayout>
