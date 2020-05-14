@@ -1,6 +1,7 @@
 package com.example.snapventuremultiplayer.ui.camera
 
 import android.app.Dialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -23,6 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.snapventuremultiplayer.R
+import com.example.snapventuremultiplayer.ScoreActivity
 import com.example.snapventuremultiplayer.databinding.ActivityCameraBinding
 import com.example.snapventuremultiplayer.repository.datasource.remote.firestore.matchmaking.MatchmakingRepoImpl
 import com.example.snapventuremultiplayer.repository.datasource.remote.mlkit.imagelabeling.ImageLabelingRepoImpl
@@ -116,6 +118,12 @@ class CameraActivity : AppCompatActivity() {
                 if (waitingDialog.isShowing) {
                     waitingDialog.dismiss()
                 }
+            }
+        })
+
+        cameraViewModel.scoreIntent.observe(this, Observer { state ->
+            if (state) {
+                intentToScore()
             }
         })
     }
@@ -372,6 +380,12 @@ class CameraActivity : AppCompatActivity() {
         logoView.startAnimation(bounceAnimation)
 
         waitingDialog.show()
+    }
+
+    private fun intentToScore() {
+        var toScore: Intent = Intent(this@CameraActivity, ScoreActivity::class.java)
+        toScore.putExtra("roomname", cameraViewModel.roomData.value!!.roomID)
+        startActivity(toScore)
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

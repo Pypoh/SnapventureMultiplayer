@@ -34,6 +34,8 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
 
     var opponentFinish: MutableLiveData<Boolean> = MutableLiveData()
 
+    var scoreIntent: MutableLiveData<Boolean> = MutableLiveData()
+
 
     // Gameplay
     var currentStage: MutableLiveData<Int> = MutableLiveData()
@@ -65,6 +67,7 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
 
     fun setupRoomData(roomModel: RoomModel) {
         this.roomData.value = roomModel
+        scoreIntent.value = false
 
         if (userID == roomModel.userIdPlayer1) {
             playerNumber.value = 1
@@ -148,7 +151,6 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
 
     private fun listenToScore() {
         opponentFinish.postValue(false)
-
         Thread.sleep(1000)
         Log.d("CameraViewModelData: ", "snapshot initiated: ${opponentFinish.value}")
 
@@ -166,15 +168,18 @@ class CameraViewModel(private val cameraUseCase: ICamera, private val scoreUseCa
 
                 if (playerNumber.value == 1) {
                     if (roomModelResult!!.scorePlayer2 > -1) {
-                        GlobalScope.launch {
+                        viewModelScope.launch {
                             opponentFinish.postValue(true)
+                            scoreIntent.value = true
                             Log.d("CameraViewModelData: ", "snapshot change: ${opponentFinish.value}")
+
                         }
                     }
                 } else {
                     if (roomModelResult!!.scorePlayer1 > -1) {
-                        GlobalScope.launch {
+                        viewModelScope.launch {
                             opponentFinish.postValue(true)
+                            scoreIntent.value = true
                         }
                     }
                 }

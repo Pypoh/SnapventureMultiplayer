@@ -19,7 +19,8 @@
         android:theme="@style/MaterialTheme">
         <activity android:name=".ScoreActivity"></activity>
         <activity android:name=".LobbyActivity" />
-        <activity android:name=".ui.loading.LoadingMatchActivity" />
+        <activity android:name=".ui.loading.LoadingMatchActivity">
+        </activity>
         <activity
             android:name=".ui.camera.CameraActivity"
             android:theme="@style/MaterialTheme.NoActionBar" />
