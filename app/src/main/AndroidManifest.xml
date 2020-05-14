@@ -17,7 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/MaterialTheme">
-        <activity android:name=".ui.MatchmakingActivity"></activity>
+        <activity android:name=".LobbyActivity"></activity>
+        <activity android:name=".ui.MatchmakingActivity" />
         <activity android:name=".ui.loading.LoadingMatchActivity" />
         <activity
             android:name=".ui.camera.CameraActivity"

@@ -2,6 +2,7 @@ package com.example.snapventuremultiplayer.ui.dashboard
 
 import android.app.AlertDialog
 import android.content.ContentValues
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
@@ -16,16 +17,20 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.snapventuremultiplayer.LobbyActivity
 import com.example.snapventuremultiplayer.R
 import com.example.snapventuremultiplayer.repository.model.QuestionsModel
 import com.example.snapventuremultiplayer.repository.model.RoomModel
 import com.example.snapventuremultiplayer.ui.home.HomeViewModel
-import com.google.android.material.button.MaterialButton
+import com.example.snapventuremultiplayer.ui.loading.LoadingMatchActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import toast
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.random.Random
@@ -88,6 +93,7 @@ class DashboardFragment : Fragment() {
         setupViewBinding(root)
         return root
     }
+
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -157,17 +163,15 @@ class DashboardFragment : Fragment() {
 
         mRef.collection("multiplayer").document(roomId).get().addOnSuccessListener { doc ->
             if (doc.exists()) {
-                preferences = requireContext().getSharedPreferences("PREFS", 0)
                 Log.d("Dashboard checkRoom", "Room Found")
-//                            val editor: SharedPreferences.Editor = preferences.edit()
-//                            editor.putString("roomname", roomName)
-//                            editor.apply()
-//                            //pindah fragment
+                val player_status: Int = 2
+                intentToLobby(player_status)
             } else {
                 Log.d("Dashboard checkRoom", "Room Not Found")
             }
         }
     }
+
     private suspend fun getAllQuestions() {
         try {
             val colRef: CollectionReference = mRef.collection("questions")
@@ -203,12 +207,13 @@ class DashboardFragment : Fragment() {
                     questionDataSet.add(questionModel)
                 }.await()
             }
+
+            getAllRoomId()
+
         } catch (e: FirebaseFirestoreException) {
-
+            Log.d("DashboardFragment: ", e.message + "")
         }
-
     }
-
 
     @RequiresApi(Build.VERSION_CODES.N)
     suspend fun getAllRoomId() {
@@ -228,6 +233,7 @@ class DashboardFragment : Fragment() {
 
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.N)
     suspend fun checkRoomId(roomId: String) {
         mRef.collection("multiplayer").document(roomId).get().addOnSuccessListener { doc ->
@@ -256,19 +262,42 @@ class DashboardFragment : Fragment() {
             }
             createRoomDatabase(roomId)
         } catch (e: FirebaseFirestoreException) {
+
             generateRoomId()
+
         }
     }
 
-    suspend fun createRoomDatabase(roomId: String) {
+    private suspend fun createRoomDatabase(roomId: String) {
+        return try {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+            val roomModel = hashMapOf("userIdPlayer1" to userId, "userIdPlayer2" to "", "scorePlayer1" to -1, "scorePlayer2" to -1, "player1Ready" to false, "player2Ready" to false, "roomId" to roomId)
 
-            generateRoomId()
+            val docRef: DocumentReference = mRef.collection("multiplayer").document(roomId)
+            docRef.set(roomModel).addOnSuccessListener { result ->
+                Log.d("DashboardFragment: ", "$result")
+            }.await()
+            for ((index, questionId:String) in questionIds.withIndex()) {
+                val docCollection: DocumentReference = docRef.collection("questions").document(questionId)
+                docCollection.set(questionDataSet[index]).addOnCompleteListener { result ->
 
+                }.await()
 
+            }
+            val player_status:Int = 1
+            intentToLobby(player_status)
+
+        } catch (e: FirebaseFirestoreException) {
+
+        }
     }
 
-    private fun intentToLobby() {
+    private fun intentToLobby(status: Int) {
+        Log.d("DashboardFragment", "Success")
 
+        val intent = Intent(context, LobbyActivity::class.java)
+        intent.putExtra("STATUS", status)
+        startActivity(intent)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
